@@ -1,0 +1,41 @@
+---
+title: "assignment2_task2"
+author: "Claire Madden"
+date: "2/11/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      message = FALSE,
+                      warning = FALSE)
+```
+
+Citation: Columbia River DART, Columbia Basin Research, University of Washington. (2019). Adult Passage Graphics & Text. Available from http://www.cbr.washington.edu/dart/query/adult_graph_text
+
+1.	A useful descriptive introductory summary (3 - 4 sentences) of what’s contained in the project
+2.	Image(s), with captions and necessary citation(s), of Bonneville Dam and/or steelhead (or whatever time series data you choose to explore)
+3.	All of your organized and well-annotated code (with warnings/messages hidden) used to create at least:
+
+-	A finalized time series plot of the original observations (daily data)
+-	A finalized seasonplot to explore if/how monthly passage has shifted over time (I totaled counts by month before doing this...you can choose if you want to do that)
+-	A finalized visualization of annual steelhead passage counts 
+
+4.	Make sure that your figures appear in your final knitted document, each with a useful caption. Include text associated with each to help the audience understand and interpret the results. 
+
+```{r}
+
+library(tidyverse)
+
+
+
+fish_data <- read_csv("cbr_fish_passage_bonneville_allyrs_steelhead.csv")
+
+
+```
+
+
+
+
+
+

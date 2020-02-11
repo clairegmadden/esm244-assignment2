@@ -1,0 +1,41 @@
+---
+title: "assignment2_task1"
+author: "Claire Madden"
+date: "2/11/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      message = FALSE,
+                      warning = FALSE)
+```
+
+
+1.	McKiernan, E.C. et al. (2016). How open science helps researchers succeed. eLife. 2016; 5: e16800. doi: 10.7554/eLife.16800. https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4973366/
+
+2.	Bahlai, C. et al (2018). Open Science Isn't Always Open to All Scientists. American Scientist. https://www.americanscientist.org/article/open-science-isnt-always-open-to-all-scientists 
+
+In ~ 400 - 500 words, prepare a brief, well-written statement: 
+
+●	What are some important goals of “open science” and how do they benefit researchers and environmental scientists? 
+●	What are some problems with how open science is currently approached regarding inclusiveness, equity and accessibility?
+●	Describe the tools, skills and approaches you are using to make your work more reproducible and open (at a level that makes sense for you - e.g. within research groups, with your adviser, sharing with the public, etc.)
+●	Describe limitations of your current data science work or workflow regarding openness, inclusiveness and accessibility. What are some ways that you could overcome those limitations moving forward in a career beyond UCSB?
+
+
+```{r}
+library(tidyverse)
+
+
+
+
+```
+
+
+
+
+
+
+
+
