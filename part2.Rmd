@@ -26,15 +26,33 @@ Citation: Columbia River DART, Columbia Basin Research, University of Washington
 ```{r}
 
 library(tidyverse)
+library(tsibble)
+library(fable)
+library(fabletools)
+library(feasts)
+library(forecast)
+library(janitor)
+library(lubridate)
 
+fish_data <- read_csv("cbr_fish_passage_bonneville_allyrs_steelhead.csv") %>% 
+  clean_names()
 
+# data explorations
 
-fish_data <- read_csv("cbr_fish_passage_bonneville_allyrs_steelhead.csv")
+View(fish_data)
+class(fish_data$mm_dd) #character format 
 
 
 ```
 
 
+```{r}
+fish_clean <- fish_data %>% 
+  mutate(new_date = mm_dd) %>% 
+  separate(new_date, into = c("day", "month"), sep = "-") %>% 
+  mutate(date = paste(day, month, year, sep = "-")) %>% 
+  dmy(date)
+```
 
 
 

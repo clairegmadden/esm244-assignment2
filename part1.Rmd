@@ -27,9 +27,6 @@ In ~ 400 - 500 words, prepare a brief, well-written statement:
 ```{r}
 library(tidyverse)
 
-
-
-
 ```
 
 
