@@ -48,11 +48,56 @@ class(fish_data$mm_dd) #character format
 
 ```{r}
 fish_clean <- fish_data %>% 
-  mutate(new_date = mm_dd) %>% 
-  separate(new_date, into = c("day", "month"), sep = "-") %>% 
-  mutate(date = paste(day, month, year, sep = "-")) %>% 
-  dmy(date)
+  mutate(date = paste(mm_dd, year)) %>% # combine date info into a single column
+  mutate(ts_date = lubridate::parse_date_time(date, "dmy")) %>% # turn into a recognizable format 
+  mutate(ts_date = as.Date(ts_date)) %>% # change class to date
+  mutate(month_sep = yearmonth(ts_date)) %>% #not sure if i need this step but leaving it in case
+  drop_na(month_sep) %>% # remove na values from month_sep (all are on February 29th which must be considered a 'nonsensical' date in tsibbles brain..?)
+  drop_na(value) # drop na observations in value column
+
+
+fish_parse <- fish_clean %>% 
+  mutate(new_date = ts_date) %>% 
+  separate(new_date, into = c("year", "month", "day"), sep = "-")
+  
 ```
+
+
+
+```{r}
+# timeseries plot of original observations (daily data)
+fish_ts_daily <- ggplot(data = fish_clean, aes(x = ts_date, y = value))+
+  geom_line()+
+  theme_minimal()
+
+fish_ts_daily
+
+```
+
+
+```{r}
+# seasonplot is not going great ... 
+
+fish_ts <- as_tsibble(fish_clean, index = ts_date) %>% 
+ # tsibble::fill_gaps() # not feeling sure about if i need this step or what exactly it does, check back
+
+fish_ts %>% autoplot(value)
+fish_ts %>% gg_subseries(value) # error "data contains implicit gaps in time, use tsbibble::fill_gaps() to conver to explicit missing values"
+
+ggplot(data = fish_parse, aes(x = month , y = value, group = year)) +
+  geom_line(aes(color = year), alpha = 0.5)
+
+
+```
+
+
+
+
+
+
+
+
+
 
 
 
