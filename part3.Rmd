@@ -29,9 +29,32 @@ There is flexibility! You can decide:
 
 ```{r}
 library(tidyverse)
+library(sf)
+library(tmap)
+library(mapview)
+library(here)
+library(dplyr)
+
+watersheds <- read_sf(dsn = here("HI_watersheds"), layer = "Watersheds") %>% 
+  st_transform(crs = 4326)
+
+landuse <- read_sf(dsn = here("HI_land_use"), layer = "Land_Use_Land_Cover_LULC") %>% 
+  st_transform(crs = 4326) #%>% 
+  #case_when(landcover == "Bays and Estuaries" | "Lakes" | "Reservoirs" | "Streams and Canals" ~ "water body", landcover == "0" | "Transitional Area" ~ "unknown"))
 
 
+hi_map <- ggplot()+
+  geom_sf(data = watersheds)
 
+hi_map
+
+
+kauai <- hi_map + 
+  coord_sf(xlim = c(-159, -160), ylim = c(21.5, 22.5), expand = FALSE) +
+  geom_sf(data = landuse, aes(fill = landcover))
+
+kauai
+  
 ```
 
 
