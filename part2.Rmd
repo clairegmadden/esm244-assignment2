@@ -33,6 +33,7 @@ library(feasts)
 library(forecast)
 library(janitor)
 library(lubridate)
+library(paletteer)
 
 fish_data <- read_csv("cbr_fish_passage_bonneville_allyrs_steelhead.csv") %>% 
   clean_names()
@@ -40,6 +41,8 @@ fish_data <- read_csv("cbr_fish_passage_bonneville_allyrs_steelhead.csv") %>%
 # data explorations
 
 View(fish_data)
+unique(fish_data$parameter) # only Stlhd contained in the dataset
+unique(fish_data$datatype) # only Adult Passage recorded
 class(fish_data$mm_dd) #character format 
 
 
@@ -55,10 +58,13 @@ fish_clean <- fish_data %>%
   drop_na(month_sep) %>% # remove na values from month_sep (all are on February 29th which must be considered a 'nonsensical' date in tsibbles brain..?)
   drop_na(value) # drop na observations in value column
 
-
+# create another dataframe with parsed date data for use later
 fish_parse <- fish_clean %>% 
-  mutate(new_date = ts_date) %>% 
-  separate(new_date, into = c("year", "month", "day"), sep = "-")
+  mutate(new_date = ts_date) %>% # duplicate date column
+  separate(new_date, into = c("year", "month", "day"), sep = "-") %>% #seperate date components
+  mutate(year = as.numeric(year), # make all date components recognized as numeric (not character)
+         month = as.numeric(month),
+         day = as.numeric(day))
   
 ```
 
@@ -68,36 +74,110 @@ fish_parse <- fish_clean %>%
 # timeseries plot of original observations (daily data)
 fish_ts_daily <- ggplot(data = fish_clean, aes(x = ts_date, y = value))+
   geom_line()+
-  theme_minimal()
+  theme_minimal()+
+  labs(x = "Date",
+       y = "Count of Adult Steelhead Trout \nPassing Bonneville Dam")+
+  scale_y_continuous(expand = c(0,0),
+                     limits = c(0,35000))
 
 fish_ts_daily
 
+# check out observations since 2000 to see more detail
+
+fish_since2000 <- fish_clean %>% 
+  filter(year>=2000)
+
+fish_ts_2000 <- ggplot(data = fish_since2000, aes(x = ts_date, y = value))+
+  geom_line()+
+  theme_minimal()+
+  labs(x = "Date",
+       y = "Count of Adult Steelhead Trout \nPassing Bonneville Dam")+
+  scale_y_continuous(expand = c(0,0),
+                     limits = c(0,35000))
+
+fish_ts_2000 # this one is a lot better for seeing seasonality/yearly peaks
 ```
 
 
 ```{r}
 
+fish_ts_month <- ggplot(data = fish_clean, aes(x = month_sep, y = value))+
+  geom_line()+
+  theme_minimal()
+
+fish_ts_month # this one looks the same as daily... 
 
 # seasonplot is not going great ... 
 
-fish_ts <- as_tsibble(fish_clean, index = ts_date)
- # tsibble::fill_gaps() # not feeling sure about if i need this step or what exactly it does, check back
+fish_ts <- as_tsibble(fish_clean, index = ts_date) %>% 
+  tsibble::fill_gaps() # add this step to make gg_subseries happy
 
 fish_ts %>% autoplot(value)
-fish_ts %>% gg_subseries(value) # error "data contains implicit gaps in time, use tsbibble::fill_gaps() to conver to explicit missing values"
-
-ggplot(data = fish_parse, aes(x = month , y = value, group = year)) +
-  geom_line(aes(color = year), alpha = 0.5)
 
 
+# need to make a monthly summary of values to make a season plot
 
-# make a subset with monthly totals 
+fish_month <- fish_clean %>% 
+  group_by(month_sep) %>% 
+  summarize(month_agg = sum(value)) %>% 
+  mutate(year_month = tsibble::yearmonth(month_sep),
+         month = month(year_month, label = TRUE),
+         year = year(year_month))
+
+fish_month_ts <- as_tsibble(fish_month, index = year_month) %>% 
+  tsibble::fill_gaps()
+
+fish_month_ts %>% gg_season(month_agg) # gg_season still not working
+
+
+month_season_plot <- ggplot(data = fish_month, aes(x = month, y = month_agg, group = year)) +
+  geom_line(aes(color = year))+
+  
+
+
+# make season plot with ggplot, which this is not..
+#season_plot <- ggplot(data = fish_parse, aes(x = month , y = value, group = year)) +
+#  geom_line(aes(color = year), alpha = 0.5)+
+#  theme_minimal()+
+ # scale_x_continuous(expand = c(0,0),
+#                     breaks = seq(1,12,1),
+#                     labels = c("January", "February", "March", 
+#                                "April", "May", "June", 
+#                                "July", "August", "September", 
+#                                "October", "November", "December"))+
+#  scale_color_paletteer_c("ggthemes::Orange-Blue Diverging")+
+#  labs(x = "Month",
+#       y = "Count of Adult Steelhead Trout \nPassing Bonneville Dam",
+#       color = "Observation Year")+
+#  theme(axis.text.x = element_text(angle = 45, hjust = 1))+
+#  scale_y_continuous(expand = c(0,0))
+
+#season_plot
+
+
+
 
 
 ```
 
 
 
+```{r}
+# annual passages
+
+fish_year <- fish_clean %>% 
+  group_by(year) %>% 
+  summarize(annual_agg = sum(value)) %>% 
+  mutate(year = year)
+
+
+fish_year_ts <- ggplot(data = fish_year, aes(x = year, y = annual_agg)) +
+  geom_line(aes(color = year))
+
+
+fish_year_ts
+
+```
 
 
 
