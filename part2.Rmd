@@ -76,9 +76,11 @@ fish_ts_daily
 
 
 ```{r}
+
+
 # seasonplot is not going great ... 
 
-fish_ts <- as_tsibble(fish_clean, index = ts_date) %>% 
+fish_ts <- as_tsibble(fish_clean, index = ts_date)
  # tsibble::fill_gaps() # not feeling sure about if i need this step or what exactly it does, check back
 
 fish_ts %>% autoplot(value)
@@ -86,6 +88,10 @@ fish_ts %>% gg_subseries(value) # error "data contains implicit gaps in time, us
 
 ggplot(data = fish_parse, aes(x = month , y = value, group = year)) +
   geom_line(aes(color = year), alpha = 0.5)
+
+
+
+# make a subset with monthly totals 
 
 
 ```
