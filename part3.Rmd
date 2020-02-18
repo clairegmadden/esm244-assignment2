@@ -34,13 +34,42 @@ library(tmap)
 library(mapview)
 library(here)
 library(dplyr)
+library(paletteer)
 
 watersheds <- read_sf(dsn = here("HI_watersheds"), layer = "Watersheds") %>% 
   st_transform(crs = 4326)
 
 landuse <- read_sf(dsn = here("HI_land_use"), layer = "Land_Use_Land_Cover_LULC") %>% 
-  st_transform(crs = 4326) #%>% 
-  #case_when(landcover == "Bays and Estuaries" | "Lakes" | "Reservoirs" | "Streams and Canals" ~ "water body", landcover == "0" | "Transitional Area" ~ "unknown"))
+  st_transform(crs = 4326) %>% 
+  mutate(landcover_rename = case_when(landcover == "Cropland and Pasture" ~ "Agriculture",
+                                      landcover == "Commercial and Services" ~ "Industry", 
+                                      landcover == "Residential" ~ "Urban", 
+                                      landcover == "Evergreen Forest Land" ~ "Undeveloped", 
+                                      landcover == "Other Urban or Built-up Land" ~ "Urban",
+                                      landcover == "Mixed Rangeland" ~ "Agriculture",
+                                      landcover == "Industrial" ~ "Industry",
+                                      landcover == "Streams and Canals" ~ "Water", 
+                                      landcover == "Orchards, Groves, Vineyards, Nurseries and Ornamental Horticultural Areas" ~ "Agriculture",
+                                      landcover == "Shrub and Brush Rangeland" ~ "Agriculture",
+                                      landcover == "Forested Wetland" ~ "Undeveloped",
+                                      landcover == "Reservoirs" ~ "Water",
+                                      landcover == "Nonforested Wetland" ~ "Undeveloped",
+                                      landcover == "Bare Exposed Rock" ~ "Undeveloped",
+                                      landcover == "Sandy Areas Other than Beaches" ~ "Undeveloped",
+                                      landcover == "Transportation, Communications and Utilities" ~ "Industry",
+                                      landcover == "Herbaceous Rangeland" ~ "Agriculture",
+                                      landcover == "Beaches" ~ "Undeveloped",
+                                      landcover == "Other Agricultural Land" ~ "Agriculture",
+                                      landcover == "Lakes" ~ "Water",
+                                      landcover == "Strip Mines, Quarries, and Gravel Pits" ~ "Industry",
+                                      landcover == "Mixed Barren Land" ~ "Undeveloped",
+                                      landcover == "Bays and Estuaries" ~ "Water",
+                                      landcover == "Mixed Urban or Built-up Land" ~ "Urban",
+                                      landcover == "Transitional Areas" ~ "Unknown",
+                                      landcover == "0" ~ "Unknown",
+                                      landcover == "Industrial and Commercial Complexes" ~ "Industry",
+                                      landcover == "Confined Feeding Operations" ~ "Agriculture"))
+  
 
 
 hi_map <- ggplot()+
@@ -49,12 +78,18 @@ hi_map <- ggplot()+
 hi_map
 
 
-kauai <- hi_map + 
-  coord_sf(xlim = c(-159, -160), ylim = c(21.5, 22.5), expand = FALSE) +
-  geom_sf(data = landuse, aes(fill = landcover))
+kauai <- ggplot() + 
+  geom_sf(data = landuse, aes(fill = landcover_rename), color = NA) + 
+  scale_fill_manual(values = c("peru", "indianred4", "darkolivegreen", "grey65", "plum", "cadetblue4"))+
+  geom_sf(data = watersheds, fill = NA, color = "white", size = 0.2)+
+  coord_sf(xlim = c(-159.2, -159.8), ylim = c(21.8, 22.3), expand = FALSE)+
+  theme_minimal()+
+  labs(fill = "Landcover Type")
 
 kauai
-  
+
+
+
 ```
 
 
